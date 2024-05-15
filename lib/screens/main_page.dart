@@ -109,6 +109,8 @@ class _MainPageState extends State<MainPage> {
                           userChoice: MainPage.isButtonsPressed[0] == true
                               ? 0
                               : 1, // 0 == 0 : 1 = X
+                          computerPoints: 0,
+                          userPoints: 0,
                         );
                       },
                     ),

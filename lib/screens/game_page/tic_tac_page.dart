@@ -1,16 +1,22 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tic_tac_toe_game/screens/game_page/widgets/container_creator.dart';
 import 'package:tic_tac_toe_game/utils/extension/sized_box_extension.dart';
+import 'package:zoom_tap_animation/zoom_tap_animation.dart';
 
 class TicTacGamePage extends StatefulWidget {
   final String userName;
   final int userChoice;
+  int userPoints;
+  int computerPoints;
 
   TicTacGamePage({
     super.key,
     required this.userName,
     required this.userChoice,
+    required this.userPoints,
+    required this.computerPoints,
   });
 
   @override
@@ -18,12 +24,10 @@ class TicTacGamePage extends StatefulWidget {
 }
 
 class _TicTacGamePageState extends State<TicTacGamePage> {
-  int userPoints = 0;
-  int computerPoints = 0;
-  bool whoseTurn = false;
   List<List<String>> grid = List.generate(3, (_) => List.filled(3, ''));
 
   bool isUserTurn = true;
+  bool won = false;
 
   void onTapCell(int row, int col) {
     if (grid[row][col].isEmpty) {
@@ -34,43 +38,69 @@ class _TicTacGamePageState extends State<TicTacGamePage> {
     }
     for (int i = 0; i < 3; i++) {
       if (grid[i][0] == 'X' && grid[i][1] == 'X' && grid[i][2] == 'X') {
-        print('x won');
-        win = true;
-        setState(() {});
+        setState(() {
+          showMessage('x');
+          won = true;
+        });
       }
       if (grid[0][i] == 'X' && grid[1][i] == 'X' && grid[2][i] == 'X') {
-        print('x won');
-        win = true;
-        setState(() {});
+        setState(() {
+          showMessage('x');
+          won = true;
+        });
       }
       if (grid[i][0] == 'O' && grid[i][1] == 'O' && grid[i][2] == 'O') {
-        print('o won');
-        win = true;
-        setState(() {});
+        setState(() {
+          showMessage('o');
+          won = true;
+        });
       }
       if (grid[0][i] == 'O' && grid[1][i] == 'O' && grid[2][i] == 'O') {
-        print('o won');
-        win = true;
-        setState(() {});
+        setState(() {
+          showMessage('o');
+          won = true;
+        });
+      }
+      if (grid[0][0] == 'O' && grid[1][1] == 'O' && grid[2][2] == 'O') {
+        setState(() {
+          showMessage('o');
+          won = true;
+        });
+      }
+      if (grid[0][0] == 'X' && grid[1][1] == 'X' && grid[2][2] == 'X') {
+        setState(() {
+          showMessage('x');
+          won = true;
+        });
+      }
+      if (grid[0][2] == 'X' && grid[1][1] == 'X' && grid[2][0] == 'X') {
+        setState(() {
+          showMessage('x');
+          won = true;
+        });
+      }
+      if (grid[0][2] == 'O' && grid[1][1] == 'O' && grid[2][0] == 'O') {
+        setState(() {
+          showMessage('o');
+          won = true;
+        });
       }
     }
   }
 
-  bool win = false;
-
-  void showMessage() async {
+  void showMessage(String whoWon) async {
     await showDialog(
       barrierDismissible: false,
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text("Siz yutdingiz!"),
+          title: Text("Siz yutdingiz! $whoWon"),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("Ok"),
+              child: buttonNewGape(whoWon),
             ),
           ],
         );
@@ -133,7 +163,8 @@ class _TicTacGamePageState extends State<TicTacGamePage> {
                         ),
                       ),
                       TextSpan(
-                        text: '  $userPoints : $computerPoints  ',
+                        text:
+                            '  ${widget.userPoints} : ${widget.computerPoints}  ',
                         style: TextStyle(
                           fontSize: 17.sp,
                           fontWeight: FontWeight.w700,
@@ -172,6 +203,8 @@ class _TicTacGamePageState extends State<TicTacGamePage> {
               ],
             ),
           ),
+          50.height(),
+          buttonNewGape(''),
         ],
       ),
     );
@@ -191,6 +224,55 @@ class _TicTacGamePageState extends State<TicTacGamePage> {
       decoration: BoxDecoration(
         color: Color(0xFFFAC100),
         shape: BoxShape.circle,
+      ),
+    );
+  }
+
+  Widget buttonNewGape(String whoWon) {
+    if (won) {
+      if (whoWon == 'x') {
+        widget.userPoints += 1;
+      } else if (whoWon == 'o') {
+        widget.computerPoints += 1;
+      }
+    }
+
+    return ZoomTapAnimation(
+      onTap: () {
+        setState(
+          () {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (context) {
+                  return TicTacGamePage(
+                    userName: widget.userName,
+                    userChoice: widget.userChoice,
+                    userPoints: widget.userPoints,
+                    computerPoints: widget.computerPoints,
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+      child: Container(
+        height: 50.h,
+        width: 200.w,
+        decoration: BoxDecoration(
+            color: Color(0xFF015E5F),
+            borderRadius: BorderRadius.circular(15.r)),
+        child: Center(
+          child: Text(
+            'New Game!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
       ),
     );
   }
